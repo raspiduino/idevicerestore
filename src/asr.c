@@ -256,16 +256,17 @@ int asr_perform_validation(asr_client_t asr, const char* filesystem)
 	while (1) {
 		if (asr_receive(asr, &packet) < 0) {
 			error("ERROR: Unable to receive validation packet\n");
-			return -1;
 		}
 
 		if (packet == NULL) {
-			if (attempts < 5) {
+			if (attempts < 10) {
 				info("Retrying to receive validation packet... %d\n", attempts);
 				attempts++;
 				sleep(1);
 				continue;
 			}
+			error("ERROR: Unable to receive validation packet\n");
+			return -1;
 		}
 
 		attempts = 0;
@@ -378,7 +379,7 @@ int asr_send_payload(asr_client_t asr, const char* filesystem)
 
 	int size = 0;
 	i = length;
-	int retry = 3;
+	int retry = 10;
 	while(i > 0 && retry >= 0) {
 		size = ASR_PAYLOAD_CHUNK_SIZE;
 		if (i < ASR_PAYLOAD_CHUNK_SIZE) {
